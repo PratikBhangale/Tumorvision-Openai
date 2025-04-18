@@ -1,0 +1,12 @@
+langgraph
+streamlit
+langchain-openai
+langchain-community
+python-dotenv
+duckduckgo-search
+pillow
+aiohttp
+openai
+langsmith
+langchain-astradb
+langchain-tavily
