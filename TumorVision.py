@@ -229,7 +229,9 @@ if uploaded_image:
             prompt1 =f"""
             Make sure to mention the result in the first line. Based on the segmentation mask, the tumor detection result is: {result['tumor_detection']}.
 
-            Please analyze both the original MRI scan and the segmentation mask. Focus on:
+            The tumor is highlighted in red pixels if it is detected.
+
+            Please analyze the segmentation mask. Focus on:
 
             1. Location of abnormal tissue - identify the brain region (frontal, temporal, parietal, occipital lobe, cerebellum, brainstem) and whether it's unilateral or bilateral
             2. Potential differential diagnoses based on imaging characteristics (glioma, meningioma, metastasis, etc.)
@@ -268,8 +270,8 @@ if uploaded_image:
             with st.spinner('Generating image descriptions...'):
                 # Get descriptions of both images using OpenAI
                 original_image_description = get_image_description(
-                    st.session_state.image_base64,
-                    second_image_base64=overlay_base64,
+                    image_base64=overlay_base64,
+                    # second_image_base64=overlay_base64,
                     prompt=prompt1
                 )
                 
