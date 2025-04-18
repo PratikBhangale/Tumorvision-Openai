@@ -265,6 +265,7 @@ if uploaded_image:
             # Convert overlay image from numpy array to base64
             overlay_img_pil = Image.fromarray(overlay_img)
             overlay_buffer = BytesIO()
+            overlay_img_pil.save(overlay_buffer, format="JPEG")
             overlay_base64 = base64.b64encode(overlay_buffer.getvalue()).decode()
 
             with st.spinner('Generating image descriptions...'):
