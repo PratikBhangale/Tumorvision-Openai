@@ -260,13 +260,16 @@ if uploaded_image:
 
             # Create the overlay
             overlay_img = cv2.addWeighted(original_img_np, 0.7, colored_mask, 0.3, 0)
-
+            # Convert overlay image from numpy array to base64
+            overlay_img_pil = Image.fromarray(overlay_img)
+            overlay_buffer = BytesIO()
+            overlay_base64 = base64.b64encode(overlay_buffer.getvalue()).decode()
 
             with st.spinner('Generating image descriptions...'):
                 # Get descriptions of both images using OpenAI
                 original_image_description = get_image_description(
                     st.session_state.image_base64,
-                    second_image_base64=overlay_img,
+                    second_image_base64=overlay_base64,
                     prompt=prompt1
                 )
                 
