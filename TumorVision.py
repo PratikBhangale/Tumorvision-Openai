@@ -219,8 +219,23 @@ if uploaded_image:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             result = loop.run_until_complete(segment_tumor(st.session_state.image_base64))
-            prompt1 = f"Make sure to mention the result in the first line. Based on the segmentation mask, the tumor detection result is: {result['tumor_detection']}."
+            #f"Make sure to mention the result in the first line. Based on the segmentation mask, the tumor detection result is: {result['tumor_detection']}."
+            prompt1 =f"""
+            Make sure to mention the result in the first line. Based on the segmentation mask, the tumor detection result is: {result['tumor_detection']}.
 
+            Please analyze both the original MRI scan and the segmentation mask. Focus on:
+
+            1. Location of abnormal tissue - identify the brain region (frontal, temporal, parietal, occipital lobe, cerebellum, brainstem) and whether it's unilateral or bilateral
+            2. Potential differential diagnoses based on imaging characteristics (glioma, meningioma, metastasis, etc.)
+            3. Mass effect - signs of compression on surrounding structures, midline shift, or ventricular compression
+            4. Surrounding edema - presence and extent of edema (brain swelling)
+            5. Enhancement pattern (if visible) - homogeneous or heterogeneous
+            6. Any signs of hemorrhage, necrosis, or cystic components
+            7. Impact on nearby critical structures
+            8. Make sure to mention this is an approximation, refer to an actual medical professional for full diagnosis.
+
+            Provide a concise summary that would assist a medical professional in treatment planning.
+            """
             st.session_state.segmentation_base64 = result["segmentation_image"]
 
             # Convert the segmentation image from base64 to displayable format
