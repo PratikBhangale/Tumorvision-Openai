@@ -10,3 +10,4 @@ openai
 langsmith
 langchain-astradb
 langchain-tavily
+opencv-python
