@@ -16,6 +16,8 @@ from langsmith import Client
 from langsmith.wrappers import wrap_openai
 import openai
 from st_callable_util_improved import get_streamlit_cb 
+import numpy as np
+import cv2
 
 # load_dotenv()
 
@@ -215,10 +217,14 @@ if uploaded_image:
     # Only process if we haven't seen this image before
     if image_id not in st.session_state.processed_images:
         try:
-            # Create event loop and run the async function
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(segment_tumor(st.session_state.image_base64))
+            
+            with st.spinner('Retrieving segmentation Mask...'):
+                # Create event loop and run the async function
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(segment_tumor(st.session_state.image_base64))
+
+
             #f"Make sure to mention the result in the first line. Based on the segmentation mask, the tumor detection result is: {result['tumor_detection']}."
             prompt1 =f"""
             Make sure to mention the result in the first line. Based on the segmentation mask, the tumor detection result is: {result['tumor_detection']}.
@@ -242,30 +248,28 @@ if uploaded_image:
             segmentation_image_bytes = base64.b64decode(result["segmentation_image"])
             segmentation_image = Image.open(io.BytesIO(segmentation_image_bytes))
             
+
+            # Convert PIL images to numpy arrays for processing
+            original_img_np = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2GRAY)
+            original_img_np = cv2.cvtColor(original_img_np, cv2.COLOR_GRAY2RGB)  # Convert back to 3 channels for overlay
+            segmentation_np = np.array(segmentation_image)
+
+            # Create a colored mask (red overlay)
+            colored_mask = np.zeros_like(original_img_np)
+            colored_mask[segmentation_np > 0] = [255, 0, 0]  # Red color for the segmentation
+
+            # Create the overlay
+            overlay_img = cv2.addWeighted(original_img_np, 0.7, colored_mask, 0.3, 0)
+
+
             with st.spinner('Generating image descriptions...'):
                 # Get descriptions of both images using OpenAI
                 original_image_description = get_image_description(
                     st.session_state.image_base64,
-                    second_image_base64=result["segmentation_image"],
+                    second_image_base64=overlay_img,
                     prompt=prompt1
                 )
                 
-                # segmentation_image_description = get_image_description(
-                #     result["segmentation_image"],
-                #     prompt1
-                # )
-                
-            # # Create the message content with images and descriptions
-            # ai_message_content = f"""
-            # ## Analysis Results:
-            # - **Tumor Detection**: {result['tumor_detection']}
-            
-            # I've analyzed the brain scan and generated a segmentation map showing potential areas of interest.
-            
-            # ### Brain Scan
-            # {original_image_description}
-
-            # """
             
             # Add the message to chat history
             st.session_state.messages.append(AIMessage(content=original_image_description))
@@ -279,7 +283,7 @@ if uploaded_image:
                 with col1:
                     st.image(img, caption="Original Brain Scan")
                 with col2:
-                    st.image(segmentation_image, caption="Segmentation Result")
+                    st.image(overlay_img, caption="Segmentation Result")
             
             # Mark this image as processed
             st.session_state.processed_images.add(image_id)
