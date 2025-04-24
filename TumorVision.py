@@ -63,20 +63,17 @@ st.title("TumorVision AI")
 sidebar = st.sidebar
 
 
-# Initialize API key in session state if not present
-if "openai_api_key" not in st.session_state:
-    st.session_state["openai_api_key"] = ""
-
 # Get OpenAI API key from user input in sidebar
-api_key = sidebar.text_input("Enter your OpenAI API key:", type="password", value=st.session_state["openai_api_key"])
-st.session_state["openai_api_key"] = api_key
+api_key = sidebar.text_input("Enter your OpenAI API key:", type="password")
 
 # Validate API key
-if not st.session_state["openai_api_key"]:
+if not api_key:
     st.warning("Please enter your OpenAI API key to use this application.")
     openai_api_key = None
 else:
-    openai_api_key = st.session_state["openai_api_key"]
+    # Set the API key as environment variable
+    os.environ["OPENAI_API_KEY"] = api_key
+    openai_api_key = api_key
 
 
 # Creating a Session State array to store and show a copy of the conversation to the user.
@@ -118,7 +115,7 @@ def get_image_description(image_base64, prompt=None, second_image_base64=None):
     if not st.session_state["openai_api_key"]:
         return "Please provide an OpenAI API key to analyze images."
     
-    client = OpenAI(api_key=st.session_state["openai_api_key"])
+    client = OpenAI()
     content = [
         {"type": "text", "text": prompt},
         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
