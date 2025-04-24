@@ -112,8 +112,8 @@ def get_image_description(image_base64, prompt=None, second_image_base64=None):
     if prompt == None:
        prompt = "Describe this medical image in detail:"
     
-    if not st.session_state["openai_api_key"]:
-        return "Please provide an OpenAI API key to analyze images."
+    # if not st.session_state["openai_api_key"]:
+    #     return "Please provide an OpenAI API key to analyze images."
     
     client = OpenAI()
     content = [
