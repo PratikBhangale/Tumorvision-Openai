@@ -25,10 +25,10 @@ import cv2
 
 
 
-# Set up OpenAI API key from Streamlit secrets
-openai_api_key = st.secrets["OPENAI_API_KEY"]
-if not openai_api_key:
-    raise ValueError("OPENAI_API_KEY not found in Streamlit secrets")
+# # Set up OpenAI API key from Streamlit secrets
+# openai_api_key = st.secrets["OPENAI_API_KEY"]
+# if not openai_api_key:
+#     raise ValueError("OPENAI_API_KEY not found in Streamlit secrets")
 
 
 # Tumor Segmentation API URL
@@ -62,6 +62,21 @@ st.title("TumorVision AI")
 # Create the Sidebar
 sidebar = st.sidebar
 
+
+# Initialize API key in session state if not present
+if "openai_api_key" not in st.session_state:
+    st.session_state["openai_api_key"] = ""
+
+# Get OpenAI API key from user input in sidebar
+api_key = sidebar.text_input("Enter your OpenAI API key:", type="password", value=st.session_state["openai_api_key"])
+st.session_state["openai_api_key"] = api_key
+
+# Validate API key
+if not st.session_state["openai_api_key"]:
+    st.warning("Please enter your OpenAI API key to use this application.")
+    openai_api_key = None
+else:
+    openai_api_key = st.session_state["openai_api_key"]
 
 
 # Creating a Session State array to store and show a copy of the conversation to the user.
@@ -100,7 +115,10 @@ def get_image_description(image_base64, prompt=None, second_image_base64=None):
     if prompt == None:
        prompt = "Describe this medical image in detail:"
     
-    client = OpenAI()
+    if not st.session_state["openai_api_key"]:
+        return "Please provide an OpenAI API key to analyze images."
+    
+    client = OpenAI(api_key=st.session_state["openai_api_key"])
     content = [
         {"type": "text", "text": prompt},
         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
