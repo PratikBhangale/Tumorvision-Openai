@@ -132,12 +132,14 @@ def should_continue(state: GraphsState) -> Literal["tools", "__end__"]:
 def _call_model(state: GraphsState):
     messages = state["messages"]
     images = state.get("images", [])
-    
+    api_key = state.get("api_key")
+
     # Create a multimodal model
     llm = ChatOpenAI(
         model="gpt-4.1-mini-2025-04-14",  # Change to GPT-4o which supports vision capabilities
         temperature=0.2,
         streaming=True,
+        api_key=api_key
     ).bind_tools(tools, parallel_tool_calls=False)
     
     # If there are images, modify the last user message to include the image

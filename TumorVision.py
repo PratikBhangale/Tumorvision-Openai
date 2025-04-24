@@ -373,6 +373,7 @@ if question:
         st_callback = get_streamlit_cb(st.container())
         with st.spinner('Generating response...'):  # Add spinner here
             response = invoke_our_graph(
+                api_key=st.session_state["openai_api_key"],
                 st_messages=st.session_state.messages,
                 images=uploaded_images if uploaded_images else None,
                 callables=[st_callback]
